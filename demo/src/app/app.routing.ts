@@ -25,6 +25,7 @@ import { TransitionPage } from "./pages/modules/transition/transition.page";
 
 // Behaviors
 import { LocalizationPage } from "./pages/behaviors/localization/localization.page";
+import { VisibilityPage } from "./pages/behaviors/visibility/visibility.page";
 
 // Development
 import { TestPage } from "./pages/development/test/test.page";
@@ -111,6 +112,10 @@ const appRoutes:Routes = [
     {
         path: "behaviors/localization",
         component: LocalizationPage
+    },
+    {
+        path: "behaviors/visibility",
+        component: VisibilityPage
     },
 
     // Development

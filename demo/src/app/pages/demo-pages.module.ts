@@ -30,6 +30,7 @@ import { TransitionPageComponents } from "./modules/transition/transition.page";
 
 // Behaviors
 import { LocalizationPageComponents } from "./behaviors/localization/localization.page";
+import { VisibilityPageComponents } from "./behaviors/visibility/visibility.page";
 
 // Development
 import { TestPage } from "./development/test/test.page";
@@ -69,6 +70,7 @@ import { TestPage } from "./development/test/test.page";
 
         // Behaviors
         LocalizationPageComponents,
+        VisibilityPageComponents,
 
         // Development
         TestPage
