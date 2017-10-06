@@ -27,7 +27,8 @@ import {
 
 // Behaviors
 import {
-    SuiLocalizationModule
+    SuiLocalizationModule,
+    SuiVisibilityModule
 } from "./behaviors";
 
 // Misc
@@ -60,6 +61,7 @@ import {
 
         // Behaviors
         SuiLocalizationModule,
+        SuiVisibilityModule,
 
         // Misc
         SuiUtilityModule
