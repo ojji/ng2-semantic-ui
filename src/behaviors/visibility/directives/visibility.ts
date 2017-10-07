@@ -1,5 +1,4 @@
 import { Directive, Renderer2, ElementRef, OnDestroy, OnInit, EventEmitter, Output, Input } from "@angular/core";
-import { IVisibilitySettings } from "../interfaces/visibility-settings";
 import { IPassingStep } from "../interfaces/passing-step";
 import { Cache, IElement, IScreen, IScrollPosition } from "../classes/cache";
 import { PassingAmount } from "../classes/passing-amount";
@@ -12,25 +11,28 @@ import "rxjs/add/operator/distinctUntilChanged";
 })
 export class SuiVisibility implements OnDestroy, OnInit {
 
-    private _defaultSettings:IVisibilitySettings = {
-        observeChanges: true,
-        type: false,
-        checkOnRefresh: true,
-        includeMargins: false,
-        refreshOnResize: true,
-        once: false,
-        emitSteps: "*",
-        continuous: false
-    };
+    @Input()
+    public observeChanges:boolean = true;
 
-    @Input("suiVisibility")
-    public settings:IVisibilitySettings;
+    @Input()
+    public checkOnRefresh:boolean = true;
+
+    @Input()
+    public refreshOnResize:boolean = true;
 
     @Input()
     public disabled:boolean = false;
 
     @Output()
     public onRefresh:EventEmitter<void> = new EventEmitter<void>();
+    @Input()
+    public once:boolean = false;
+
+    @Input()
+    public continuous:boolean = false;
+
+    @Input()
+    public steps:(number|string)[] | "*";
 
     @Output()
     public cacheUpdated:EventEmitter<Cache> = new EventEmitter<Cache>();
@@ -113,9 +115,8 @@ export class SuiVisibility implements OnDestroy, OnInit {
     }
 
     private initialize():void {
-        this.settings = { ...this._defaultSettings, ...this.settings };
-        if (this.settings.observeChanges) {
-            this.observeChanges();
+        if (this.observeChanges) {
+            this.setupObserver();
         }
         this.refresh();
         this.savePosition();
@@ -179,7 +180,7 @@ export class SuiVisibility implements OnDestroy, OnInit {
         this._cache.scroll = scrollPositionValue;
     }
 
-    private observeChanges():void {
+    private setupObserver():void {
         this._observer = new MutationObserver((records:MutationRecord[]) => {
             this.refresh();
         });
@@ -193,7 +194,7 @@ export class SuiVisibility implements OnDestroy, OnInit {
         this.reset();
         this.savePosition();
         this.saveSortedSteps();
-        if (this.settings.checkOnRefresh) {
+        if (this.checkOnRefresh) {
             this.checkVisibility();
         }
         this.onRefresh.emit();
@@ -218,12 +219,8 @@ export class SuiVisibility implements OnDestroy, OnInit {
     private saveElementCalculations():void {
         const screen:IScreen = this.getScreenCalculations();
         const element:IElement = this.getElementPosition();
-        if (this.settings.includeMargins) {
-            // todo
-        } else {
-            element.top = element.offset.top;
-            element.bottom = element.offset.top + element.height;
-        }
+        element.top = element.offset.top;
+        element.bottom = element.offset.top + element.height;
 
         // visibility
         element.topPassed        = (screen.top >= element.top);
@@ -314,7 +311,7 @@ export class SuiVisibility implements OnDestroy, OnInit {
         const element:IElement = this.getElementCalculations();
         if (!element.bottomPassed) {
             this._onBottomNotPassed.next(true);
-        } else if (!this.settings.once) {
+        } else if (!this.once) {
             this._onBottomNotPassed.next(false);
         }
     }
@@ -323,7 +320,7 @@ export class SuiVisibility implements OnDestroy, OnInit {
         const element:IElement = this.getElementCalculations();
         if (element.bottomPassed) {
             this._onBottomPassed.next(true);
-        } else if (!this.settings.once) {
+        } else if (!this.once) {
             this._onBottomPassed.next(false);
         }
     }
@@ -332,7 +329,7 @@ export class SuiVisibility implements OnDestroy, OnInit {
         const element:IElement = this.getElementCalculations();
         if (!element.topPassed) {
             this._onTopNotPassed.next(true);
-        } else if (!this.settings.once) {
+        } else if (!this.once) {
             this._onTopNotPassed.next(false);
         }
     }
@@ -341,7 +338,7 @@ export class SuiVisibility implements OnDestroy, OnInit {
         const element:IElement = this.getElementCalculations();
         if (element.topPassed) {
             this._onTopPassed.next(true);
-        } else if (!this.settings.once) {
+        } else if (!this.once) {
             this._onTopPassed.next(false);
         }
     }
@@ -350,7 +347,7 @@ export class SuiVisibility implements OnDestroy, OnInit {
         const element:IElement = this.getElementCalculations();
         if (!element.topVisible) {
             this._onTopNotVisible.next(true);
-        } else if (!this.settings.once) {
+        } else if (!this.once) {
             this._onTopNotVisible.next(false);
         }
     }
@@ -359,7 +356,7 @@ export class SuiVisibility implements OnDestroy, OnInit {
         const element:IElement = this.getElementCalculations();
         if (element.topVisible) {
             this._onTopVisible.next(true);
-        } else if (!this.settings.once) {
+        } else if (!this.once) {
             this._onTopVisible.next(false);
         }
     }
@@ -368,7 +365,7 @@ export class SuiVisibility implements OnDestroy, OnInit {
         const element:IElement = this.getElementCalculations();
         if (!element.bottomVisible) {
             this._onBottomNotVisible.next(true);
-        } else if (!this.settings.once) {
+        } else if (!this.once) {
             this._onBottomNotVisible.next(false);
         }
     }
@@ -377,7 +374,7 @@ export class SuiVisibility implements OnDestroy, OnInit {
         const element:IElement = this.getElementCalculations();
         if (element.bottomVisible) {
             this._onBottomVisible.next(true);
-        } else if (!this.settings.once) {
+        } else if (!this.once) {
             this._onBottomVisible.next(false);
         }
     }
@@ -386,7 +383,7 @@ export class SuiVisibility implements OnDestroy, OnInit {
         const element:IElement = this.getElementCalculations();
         if (element.onScreen) {
             this._onOnScreen.next(true);
-        } else if (!this.settings.once) {
+        } else if (!this.once) {
             this._onOnScreen.next(false);
         }
     }
@@ -395,7 +392,7 @@ export class SuiVisibility implements OnDestroy, OnInit {
         const element:IElement = this.getElementCalculations();
         if (element.offScreen) {
             this._onOffScreen.next(true);
-        } else if (!this.settings.once) {
+        } else if (!this.once) {
             this._onOffScreen.next(false);
         }
     }
@@ -409,8 +406,8 @@ export class SuiVisibility implements OnDestroy, OnInit {
             const amountClosest:IPassingStep|false = direction === "down"
             ? this.findClosestStepPassedDownwards(element.pixelsPassed)
             : this.findClosestStepPassedUpwards(element.pixelsPassed);
-            if (amountClosest && !(this.settings.once && occuredCallbacks.indexOf(amountClosest) >= 0)) {
-                if (this.settings.once) {
+            if (amountClosest && !(this.once && occuredCallbacks.indexOf(amountClosest) >= 0)) {
+                if (this.once) {
                     this._cache.occuredCallbacks[direction].push(amountClosest);
                 }
                 return new PassingAmount(amountClosest.normalizedValue, amountClosest.normalizedValue / element.height);
@@ -473,7 +470,7 @@ export class SuiVisibility implements OnDestroy, OnInit {
 
     private bindEvents():void {
         this._resizeListener = this._renderer.listen("window", "resize", (e:UIEvent) => {
-            if (this.settings.refreshOnResize) {
+            if (this.refreshOnResize) {
                 this.refresh();
             }
         });
@@ -488,7 +485,7 @@ export class SuiVisibility implements OnDestroy, OnInit {
             this.checkVisibility(e);
         });
 
-        if (!this.settings.continuous) {
+        if (!this.continuous) {
             this._onPassingSubcription = this._onPassing.distinctUntilChanged(PassingAmount.comparer)
             .subscribe(amount => {
                 this.onPassing.emit(amount);
@@ -683,13 +680,13 @@ export class SuiVisibility implements OnDestroy, OnInit {
     }
 
     private saveSortedSteps():void {
-        if (typeof this.settings.emitSteps === "string" && (this.settings.emitSteps as string) === "*") {
+        if (typeof this.steps === "string" && (this.steps as string) === "*") {
             this._cache.sortedSteps = "*";
         } else {
             const element = this.getElementCalculations();
             const passingSteps:IPassingStep[] = [];
             // populate the passingSteps array
-            (this.settings.emitSteps as (string|number)[]).forEach(elem => {
+            (this.steps as (string|number)[]).forEach(elem => {
                 if (typeof elem === "number") {
                     passingSteps.push({
                         originalValue: elem,
