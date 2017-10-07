@@ -23,8 +23,6 @@ export class SuiVisibility implements OnDestroy, OnInit {
     @Input()
     public disabled:boolean = false;
 
-    @Output()
-    public onRefresh:EventEmitter<void> = new EventEmitter<void>();
     @Input()
     public once:boolean = false;
 
@@ -35,7 +33,7 @@ export class SuiVisibility implements OnDestroy, OnInit {
     public steps:(number|string)[] | "*";
 
     @Output()
-    public cacheUpdated:EventEmitter<Cache> = new EventEmitter<Cache>();
+    public onRefresh:EventEmitter<void> = new EventEmitter<void>();
 
     @Output()
     public onPassing:EventEmitter<PassingAmount> = new EventEmitter<PassingAmount>();
@@ -289,7 +287,6 @@ export class SuiVisibility implements OnDestroy, OnInit {
         if (!this.disabled) {
             this.saveScrollPosition(scrollPosition);
             this.saveCalculations();
-            this.cacheUpdated.emit(this._cache);
             this.checkPassing();
 
             this.checkOnScreen();
