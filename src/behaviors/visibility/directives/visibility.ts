@@ -1,5 +1,6 @@
-import { Directive, Renderer2, ElementRef, OnDestroy, OnInit, EventEmitter, Output, Input } from "@angular/core";
+import { Directive, Renderer2, ElementRef, OnDestroy, OnInit, EventEmitter, Output, Input, HostListener, Inject } from "@angular/core";
 import { IPassingStep } from "../interfaces/passing-step";
+import { DOCUMENT } from "@angular/platform-browser";
 import { Cache, IElement, IScreen, IScrollPosition } from "../classes/cache";
 import { PassingAmount } from "../classes/passing-amount";
 import { Subject } from "rxjs/Subject";
@@ -30,7 +31,10 @@ export class SuiVisibility implements OnDestroy, OnInit {
     public continuous:boolean = false;
 
     @Input()
-    public steps:(number|string)[] | "*";
+    public steps:(number|string)[] | "*" = "*";
+
+    @Input()
+    public context:string = "";
 
     @Output()
     public onRefresh:EventEmitter<void> = new EventEmitter<void>();
@@ -101,8 +105,9 @@ export class SuiVisibility implements OnDestroy, OnInit {
     private _cache:Cache;
     private _resizeListener:() => void;
     private _scrollListener:() => void;
+    private _contextElement:Element|Window;
 
-    constructor(private _renderer:Renderer2, private _element:ElementRef) { }
+    constructor(private _renderer:Renderer2, private _element:ElementRef, @Inject(DOCUMENT) private _document:Document) { }
 
     public ngOnInit():void {
         this.initialize();
@@ -116,9 +121,9 @@ export class SuiVisibility implements OnDestroy, OnInit {
         if (this.observeChanges) {
             this.setupObserver();
         }
+        this.bindEvents();
         this.refresh();
         this.savePosition();
-        this.bindEvents();
     }
 
     private savePosition():void {
@@ -465,6 +470,40 @@ export class SuiVisibility implements OnDestroy, OnInit {
         }
     }
 
+    private findScrollingParentElement():Element {
+        const stack:any[] = [];
+        let elementNative = this._element.nativeElement;
+        while (elementNative.nodeType !== 9) {
+            stack.push(elementNative);
+            elementNative = elementNative.parentNode;
+        }
+        const defaultView = this._document.defaultView;
+
+        let element = stack.pop();
+        let contentOverflowing;
+        let overflowValue;
+        let overflowYValue;
+        let scrollbarShown;
+        let alwaysOnScroll;
+        let found;
+        while (element) {
+            overflowValue = defaultView.getComputedStyle(element, "").overflow || "";
+            overflowYValue = defaultView.getComputedStyle(element, "").overflowY || "";
+
+            contentOverflowing = element.scrollHeight > element.clientHeight;
+            scrollbarShown = /^(visible|auto)$/.test(overflowValue) || /^(visible|auto)$/.test(overflowYValue);
+            alwaysOnScroll = overflowValue === "scroll" || overflowYValue === "scroll";
+
+            if (alwaysOnScroll || (contentOverflowing && scrollbarShown)) {
+                found = element;
+                break;
+            }
+            element = stack.pop();
+        }
+
+        return found;
+    }
+
     private bindEvents():void {
         this._resizeListener = this._renderer.listen("window", "resize", (e:UIEvent) => {
             if (this.refreshOnResize) {
@@ -472,11 +511,22 @@ export class SuiVisibility implements OnDestroy, OnInit {
             }
         });
 
-        this._scrollListener = this._renderer.listen("window", "scroll", (e:UIEvent) => {
-            window.requestAnimationFrame((highResTime:number) => {
-                this._scrollChanged.emit({ x: window.pageXOffset, y: window.pageYOffset });
+        if (this.context === "window") {
+            this._contextElement = window;
+            this._scrollListener = this._renderer.listen("window", "scroll", (e:UIEvent) => {
+                window.requestAnimationFrame((highResTime:number) => {
+                    this._scrollChanged.emit({ x: window.pageXOffset, y: window.pageYOffset });
+                });
             });
-        });
+        } else {
+            const listeningContext = this.findScrollingParentElement();
+            this._contextElement = listeningContext;
+            this._scrollListener = this._renderer.listen(listeningContext, "scroll", (e:UIEvent) => {
+                window.requestAnimationFrame((highResTime:number) => {
+                    this._scrollChanged.emit({ x: listeningContext.scrollLeft, y: listeningContext.scrollTop });
+                });
+            });
+        }
 
         this._scrollChanged.subscribe((e:IScrollPosition) => {
             this.checkVisibility(e);
