@@ -102,10 +102,11 @@ export class SuiVisibility implements OnDestroy, OnInit {
     private _scrollChanged:EventEmitter<IScrollPosition> = new EventEmitter<IScrollPosition>();
 
     private _observer:MutationObserver;
+    private _contextObserver:MutationObserver;
     private _cache:Cache;
     private _resizeListener:() => void;
     private _scrollListener:() => void;
-    private _contextElement:Element|Window;
+    private _scrollingContext:Element|Window;
 
     constructor(private _renderer:Renderer2, private _element:ElementRef, @Inject(DOCUMENT) private _document:Document) { }
 
@@ -137,10 +138,17 @@ export class SuiVisibility implements OnDestroy, OnInit {
 
     private getOffset():any {
         const rect:ClientRect = this._element.nativeElement.getBoundingClientRect();
-        return {
-            top: rect.top + window.pageYOffset,
-            left: rect.left + window.pageXOffset
-        };
+        if (this._scrollingContext instanceof Window) {
+            return {
+                top: rect.top + this._scrollingContext.pageYOffset,
+                left: rect.left + this._scrollingContext.pageXOffset
+            };
+        } else {
+            return {
+                top: rect.top + this._scrollingContext.scrollTop,
+                left: rect.left + this._scrollingContext.scrollLeft
+            };
+        }
     }
 
     private getHeight():number {
@@ -179,13 +187,28 @@ export class SuiVisibility implements OnDestroy, OnInit {
     }
 
     private saveScrollPosition(scrollPosition?:IScrollPosition):void {
-        const scrollPositionValue:IScrollPosition = scrollPosition || { x: window.pageXOffset, y: window.pageYOffset };
+        const scrollPositionValue:IScrollPosition = scrollPosition || this.getScrollPositionFromContext();
         this._cache.scroll = scrollPositionValue;
     }
 
+    private getScrollPositionFromContext():IScrollPosition {
+        if (this._scrollingContext instanceof Window) {
+            return { x: this._scrollingContext.pageXOffset, y: this._scrollingContext.pageYOffset };
+        } else {
+            return { x: this._scrollingContext.scrollLeft, y: this._scrollingContext.scrollTop };
+        }
+    }
+
     private setupObserver():void {
+        this._contextObserver = new MutationObserver((records:MutationRecord[]) => {
+            this.savePosition();
+        });
         this._observer = new MutationObserver((records:MutationRecord[]) => {
             this.refresh();
+        });
+        this._contextObserver.observe(this._document, {
+            childList: true,
+            subtree: true
         });
         this._observer.observe(this._element.nativeElement, {
             childList: true,
@@ -512,18 +535,17 @@ export class SuiVisibility implements OnDestroy, OnInit {
         });
 
         if (this.context === "window") {
-            this._contextElement = window;
+            this._scrollingContext = window;
             this._scrollListener = this._renderer.listen("window", "scroll", (e:UIEvent) => {
                 window.requestAnimationFrame((highResTime:number) => {
-                    this._scrollChanged.emit({ x: window.pageXOffset, y: window.pageYOffset });
+                    this._scrollChanged.emit(this.getScrollPositionFromContext());
                 });
             });
         } else {
-            const listeningContext = this.findScrollingParentElement();
-            this._contextElement = listeningContext;
-            this._scrollListener = this._renderer.listen(listeningContext, "scroll", (e:UIEvent) => {
+            this._scrollingContext = this.findScrollingParentElement();
+            this._scrollListener = this._renderer.listen(this._scrollingContext, "scroll", (e:UIEvent) => {
                 window.requestAnimationFrame((highResTime:number) => {
-                    this._scrollChanged.emit({ x: listeningContext.scrollLeft, y: listeningContext.scrollTop });
+                    this._scrollChanged.emit(this.getScrollPositionFromContext());
                 });
             });
         }
@@ -698,6 +720,9 @@ export class SuiVisibility implements OnDestroy, OnInit {
     private unbindEvents():void {
         if (this._observer) {
             this._observer.disconnect();
+        }
+        if (this._contextObserver) {
+            this._contextObserver.disconnect();
         }
         this._resizeListener();
         this._scrollListener();
