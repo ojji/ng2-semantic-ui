@@ -212,7 +212,7 @@ export class SuiVisibility implements OnDestroy, AfterViewInit {
 
     private setupObserver():void {
         this._contextObserver = new MutationObserver((records:MutationRecord[]) => {
-            this.savePosition();
+            this.saveElementPosition();
         });
         this._contextObserver.observe(this._document, {
             childList: true,
