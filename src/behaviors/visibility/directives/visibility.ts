@@ -112,7 +112,7 @@ export class SuiVisibility implements OnDestroy, AfterViewInit {
 
     private _scrollChanged:EventEmitter<IScrollPosition> = new EventEmitter<IScrollPosition>();
 
-    private _observer:MutationObserver;
+    private _elementObserver:MutationObserver;
     private _contextObserver:MutationObserver;
     private _cache:Cache;
     private _resizeListener:() => void;
@@ -214,14 +214,14 @@ export class SuiVisibility implements OnDestroy, AfterViewInit {
         this._contextObserver = new MutationObserver((records:MutationRecord[]) => {
             this.savePosition();
         });
-        this._observer = new MutationObserver((records:MutationRecord[]) => {
-            this.refresh();
-        });
         this._contextObserver.observe(this._document, {
             childList: true,
             subtree: true
         });
-        this._observer.observe(this._element.nativeElement, {
+        this._elementObserver = new MutationObserver((records:MutationRecord[]) => {
+            this.refresh();
+        });
+        this._elementObserver.observe(this._element.nativeElement, {
             childList: true,
             subtree: true
         });
@@ -729,8 +729,8 @@ export class SuiVisibility implements OnDestroy, AfterViewInit {
     }
 
     private unbindEvents():void {
-        if (this._observer) {
-            this._observer.disconnect();
+        if (this._elementObserver) {
+            this._elementObserver.disconnect();
         }
         if (this._contextObserver) {
             this._contextObserver.disconnect();
