@@ -1,7 +1,18 @@
-import { Directive, Renderer2, ElementRef, OnDestroy, OnInit, EventEmitter, Output, Input, HostListener, Inject } from "@angular/core";
+import { Directive,
+         Renderer2,
+         ElementRef,
+         OnDestroy,
+         AfterViewInit,
+         EventEmitter,
+         Output,
+         Input,
+         Inject } from "@angular/core";
 import { IPassingStep } from "../interfaces/passing-step";
 import { DOCUMENT } from "@angular/platform-browser";
-import { Cache, IElement, IScreen, IScrollPosition } from "../classes/cache";
+import { Cache,
+         IElement,
+         IScreen,
+         IScrollPosition } from "../classes/cache";
 import { PassingAmount } from "../classes/passing-amount";
 import { Subject } from "rxjs/Subject";
 import { Subscription } from "rxjs/Subscription";
@@ -10,7 +21,7 @@ import "rxjs/add/operator/distinctUntilChanged";
 @Directive({
     selector: "[suiVisibility]"
 })
-export class SuiVisibility implements OnDestroy, OnInit {
+export class SuiVisibility implements OnDestroy, AfterViewInit {
 
     @Input()
     public observeChanges:boolean = true;
@@ -110,7 +121,7 @@ export class SuiVisibility implements OnDestroy, OnInit {
 
     constructor(private _renderer:Renderer2, private _element:ElementRef, @Inject(DOCUMENT) private _document:Document) { }
 
-    public ngOnInit():void {
+    public ngAfterViewInit():void {
         this.initialize();
     }
 
