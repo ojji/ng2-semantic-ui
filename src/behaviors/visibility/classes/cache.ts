@@ -36,9 +36,9 @@ class Element implements IElement {
 }
 
 export class Cache {
-    public element:Element;
-    public screen:Screen;
-    public scroll:ScrollPosition;
+    public element:IElement;
+    public screen:IScreen;
+    public scroll:IScrollPosition;
     public direction:"up" | "down" | "static";
     public sortedSteps:IPassingStep[] | "*";
     public occuredCallbacks:{
