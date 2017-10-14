@@ -12,6 +12,7 @@ import ru from "./ru";
 import he from "./he";
 import ge from "./ge";
 import nl from "./nl";
+import hu from "./hu";
 
 // This file exists for the demo app. Don't use this in real life.
 export default {
@@ -26,5 +27,6 @@ export default {
     ru,
     he,
     ge,
-    nl
+    nl,
+    hu
 };

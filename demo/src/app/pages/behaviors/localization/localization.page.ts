@@ -95,6 +95,10 @@ const supportedLanguages:ISupportedLanguage[] = [
     {
         name: "Georgian",
         code: "ge"
+    },
+    {
+        name: "Hungarian",
+        code: "hu"
     }
 ];
 
