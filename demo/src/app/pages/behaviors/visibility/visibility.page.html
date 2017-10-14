@@ -5,6 +5,17 @@
     </div>
 </demo-page-title>
 <demo-page-content>
+    <h2 class="ui dividing header">Examples</h2>
+    <demo-example [code]="exampleInfiniteScrollTemplate">
+        <div info>
+            <h4 class="ui header">Infinite Scroll</h4>
+            <p>
+                As an alternative to pagination you can use <code>onBottomVisible</code>
+                to load content automatically when the bottom of a container is reached.
+            </p>
+        </div>
+        <example-visibility-infinite-scroll result></example-visibility-infinite-scroll>
+    </demo-example>
     <h2 id="api" class="ui dividing header">API</h2>
     <demo-api [api]="api"></demo-api>
 </demo-page-content>

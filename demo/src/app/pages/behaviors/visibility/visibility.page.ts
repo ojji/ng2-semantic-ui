@@ -5,6 +5,7 @@ import { ApiDefinition } from "../../../components/api/api.component";
     templateUrl: "./visibility.page.html"
 })
 export class VisibilityPage {
+    public exampleInfiniteScrollTemplate:string = exampleInfiniteScrollTemplate;
     public api:ApiDefinition = [
         {
             selector: "[suiVisibility]",
@@ -58,11 +59,11 @@ export class VisibilityPage {
                     name: "steps",
                     type: "Array<number|string> | '*'",
                     description: `Sets the steps for the onPassing and the onPassingReverse events.
-                        When supplied an array, a step value can be given either in pixel amount (number) 
-                        or in percentage of the element height (string). You can mix these values aswell.
-                        Example values that are valid for the <code>steps</code> array:
-                        <code>[steps]="[100, 200]"</code>, <code>[steps]="['25%', '50%', '75%']"</code>.
-                        If it is set to <code>'*'</code>, the events fire on every scroll change.`,
+                    When supplied an array, a step value can be given either in pixel amount (number) 
+                    or in percentage of the element height (string). You can mix these values aswell.
+                    Example values that are valid for the <code>steps</code> array:
+                    <code>[steps]="[100, 200]"</code>, <code>[steps]="['25%', '50%', '75%']"</code>.
+                    If it is set to <code>'*'</code>, the events fire on every scroll change.`,
                     defaultValue: "'*'",
                     required: false
                 }
@@ -153,4 +154,63 @@ export class VisibilityPage {
     ];
 }
 
-export const VisibilityPageComponents = [VisibilityPage];
+const exampleInfiniteScrollTemplate = `
+<div class="ui segment" suiVisibility
+    (onBottomVisible)="loadAdditionalContent()"
+    [once]="false"
+    [observeChanges]="true">
+    <h3 class="ui dividing center aligned header">Infinite scroll example</h3>
+    <img src="https://semantic-ui.com/images/wireframe/centered-paragraph.png" class="ui image">
+    <div class="ui divider"></div>
+    <img src="https://semantic-ui.com/images/wireframe/short-paragraph.png" class="ui image">
+    <div class="ui divider"></div>
+    <img src="https://semantic-ui.com/images/wireframe/media-paragraph.png" class="ui image">
+    <div class="ui divider"></div>
+    <img src="https://semantic-ui.com/images/wireframe/short-paragraph.png" class="ui image">
+    <div class="ui divider"></div>
+    <img src="https://semantic-ui.com/images/wireframe/media-paragraph.png" class="ui image">
+    <div class="ui divider"></div>
+    <img src="https://semantic-ui.com/images/wireframe/media-paragraph.png" class="ui image">
+    <div class="ui divider"></div>
+    <img src="https://semantic-ui.com/images/wireframe/media-paragraph.png" class="ui image">
+    <div class="ui divider"></div>
+    <img src="https://semantic-ui.com/images/wireframe/media-paragraph.png" class="ui image">
+    <div class="ui divider"></div>
+    <div *ngFor="let content of contents; let i = index">
+        <h3 class="ui header">Additional content #{{i+1}}</h3>
+        <img src="https://semantic-ui.com/images/wireframe/centered-paragraph.png" class="ui image">
+        <div class="ui divider"></div>
+        <img src="https://semantic-ui.com/images/wireframe/short-paragraph.png" class="ui image">
+        <div class="ui divider"></div>
+        <img src="https://semantic-ui.com/images/wireframe/media-paragraph.png" class="ui image">
+        <div class="ui divider"></div>
+    </div>
+    <div class="ui large centered inline text loader" [class.active]="loading">
+        Adding more content...
+    </div>
+</div>
+`;
+
+@Component({
+    selector: "example-visibility-infinite-scroll",
+    template: exampleInfiniteScrollTemplate
+})
+export class VisibilityExampleInfiniteScroll {
+    public loading:boolean = false;
+    public contents:string[] = [];
+
+    constructor() {
+    }
+
+    public loadAdditionalContent():void {
+        if (this.contents.length < 3 && !this.loading) {
+            this.loading = true;
+            setTimeout(() => {
+                this.contents.push("new item");
+                this.loading = false;
+            }, 3000);
+        }
+    }
+}
+
+export const VisibilityPageComponents = [VisibilityPage, VisibilityExampleInfiniteScroll];
