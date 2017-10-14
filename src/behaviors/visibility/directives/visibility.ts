@@ -227,11 +227,29 @@ export class SuiVisibility implements OnDestroy, AfterViewInit {
         });
     }
 
+    private resetEventSubjects():void {
+        this._onOnScreen.next(false);
+        this._onOffScreen.next(false);
+        this._onTopPassed.next(false);
+        this._onTopPassed.next(false);
+        this._onTopVisible.next(false);
+        this._onTopNotVisible.next(false);
+        this._onBottomPassed.next(false);
+        this._onBottomNotPassed.next(false);
+        this._onBottomVisible.next(false);
+        this._onBottomNotVisible.next(false);
+    }
+
     private refresh():void {
         this.reset();
         this.savePosition();
         this.saveSortedSteps();
         if (this.checkOnRefresh) {
+            // we have to set all of the boolean type element visibility subjects to false,
+            // so the visibility events fire on refresh even when their value stays the same.
+            // eg. when new content is added to the bottom of the element in an infinite scroll,
+            // we want to check if the bottom if visible again so loading more content may be necessary.
+            this.resetEventSubjects();
             this.checkVisibility();
         }
         this.onRefresh.emit();
