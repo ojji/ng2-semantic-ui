@@ -16,6 +16,17 @@
         </div>
         <example-visibility-infinite-scroll result></example-visibility-infinite-scroll>
     </demo-example>
+    <demo-example [code]="exampleLazyLoadingImagesTemplate">
+        <div info>
+            <h4 class="ui header">Lazy loading images</h4>
+            <p>
+                Visibility includes several shortcuts for setting up common visibility events. Using the suiVisibility directive on image html elements will automatically attach events to an images <code>onOnScreen</code> event to load the contents of <code>imageSrc</code> as src.
+                You can specify a placeholder image as the current src or as <code>defaultSrc</code> to make sure content doesn't jump when an image loads, or you can specify no placeholder and have the image appear.
+                By default images will appear without animation, however you can also specify a named <code>transition</code>, and a <code>duration</code> that should be used for animating the image into view.
+            </p>
+        </div>
+        <example-visibility-lazy-loading-images result></example-visibility-lazy-loading-images>
+    </demo-example>
     <h2 id="api" class="ui dividing header">API</h2>
     <demo-api [api]="api"></demo-api>
 </demo-page-content>

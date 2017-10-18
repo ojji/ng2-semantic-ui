@@ -6,6 +6,7 @@ import { ApiDefinition } from "../../../components/api/api.component";
 })
 export class VisibilityPage {
     public exampleInfiniteScrollTemplate:string = exampleInfiniteScrollTemplate;
+    public exampleLazyLoadingImagesTemplate:string = exampleLazyLoadingImagesTemplate;
     public api:ApiDefinition = [
         {
             selector: "[suiVisibility]",
@@ -65,6 +66,39 @@ export class VisibilityPage {
                     <code>[steps]="[100, 200]"</code>, <code>[steps]="['25%', '50%', '75%']"</code>.
                     If it is set to <code>'*'</code>, the events fire on every scroll change.`,
                     defaultValue: "'*'",
+                    required: false
+                },
+                {
+                    name: "imageSrc",
+                    type: "string",
+                    description: `If the directive host is an <code>img</code> element, this property gives the path of the 
+                    image to be lazy-loaded.`,
+                    defaultValue: "null",
+                    required: true
+                },
+                {
+                    name: "defaultSrc",
+                    type: "string",
+                    description: `If the directive host is an <code>img</code> element, this property gives the path of the 
+                    placeholder image. You can either omit this value and set the <code>src</code> property, 
+                    or the image will pop on the screen when loaded.`,
+                    defaultValue: "null",
+                    required: false
+                },
+                {
+                    name: "transition",
+                    type: "string",
+                    description: `If the directive host is an <code>img</code> element, this property sets a transition 
+                    to the image when it has been loaded. By default the image will appear without animation.`,
+                    defaultValue: "null",
+                    required: false
+                },
+                {
+                    name: "duration",
+                    type: "number",
+                    description: `If the directive host is an <code>img</code> element, this property sets a duration 
+                    for the transition animation.`,
+                    defaultValue: "1000",
                     required: false
                 }
             ],
@@ -133,6 +167,12 @@ export class VisibilityPage {
                     name: "onBottomNotVisible",
                     type: "void",
                     description: "Fires when the bottom part of the element is not visible in the viewport."
+                },
+                {
+                    name: "onLoad",
+                    type: "any",
+                    description: `If the directive host is an <code>img</code> element, this event fires when the image is lazy loaded. 
+                    The callback parameter value is the native element.`
                 }
             ]
         },
@@ -153,6 +193,141 @@ export class VisibilityPage {
         }
     ];
 }
+
+const exampleLazyLoadingImagesTemplate = `
+<div class="ui divided items">
+<div class="item">
+  <div class="image">
+    <img suiVisibility [defaultSrc]="'https://semantic-ui.com/images/wireframe/square-image.png'"
+         [transition]="'vertical flip'" [duration]="3000"
+         [imageSrc]="'https://semantic-ui.com/images/avatar/large/elliot.jpg'">
+  </div>
+  <div class="content">
+    <h2 class="ui header">Elliot Fu</h2>
+    <p></p>
+    <div class="ui primary button">Add Friend</div>
+    <div class="ui right floated button">View <i class="right chevron icon"></i></div>
+  </div>
+</div>
+<div class="item">
+  <div class="image">
+    <img suiVisibility [defaultSrc]="'https://semantic-ui.com/images/wireframe/square-image.png'"
+         [transition]="'vertical flip'" [duration]="1000"
+         [imageSrc]="'https://semantic-ui.com/images/avatar/large/helen.jpg'">
+  </div>
+  <div class="content">
+    <h2 class="ui header">Helen Troy</h2>
+    <p></p>
+    <div class="ui primary button">Add Friend</div>
+    <div class="ui right floated button">View <i class="right chevron icon"></i></div>
+  </div>
+</div>
+<div class="item">
+  <div class="image">
+    <img suiVisibility [defaultSrc]="'https://semantic-ui.com/images/wireframe/square-image.png'"
+         [transition]="'vertical flip'" [duration]="1000"
+         [imageSrc]="'https://semantic-ui.com/images/avatar/large/jenny.jpg'">
+  </div>
+  <div class="content">
+    <h2 class="ui header">Jenny Hess</h2>
+    <p></p>
+    <div class="ui primary button">Add Friend</div>
+    <div class="ui right floated button">View <i class="right chevron icon"></i></div>
+  </div>
+</div>
+<div class="item">
+  <div class="image">
+    <img suiVisibility [defaultSrc]="'https://semantic-ui.com/images/wireframe/square-image.png'"
+         [transition]="'vertical flip'" [duration]="1000"
+         [imageSrc]="'https://semantic-ui.com/images/avatar/large/veronika.jpg'">
+  </div>
+  <div class="content">
+    <h2 class="ui header">Veronika Ossi</h2>
+    <p></p>
+    <div class="ui primary button">Add Friend</div>
+    <div class="ui right floated button">View <i class="right chevron icon"></i></div>
+  </div>
+</div>
+<div class="item">
+  <div class="image">
+    <img suiVisibility [defaultSrc]="'https://semantic-ui.com/images/wireframe/square-image.png'"
+         [transition]="'vertical flip'" [duration]="1000"
+         [imageSrc]="'https://semantic-ui.com/images/avatar/large/stevie.jpg'">
+  </div>
+  <div class="content">
+    <h2 class="ui header">Stevie</h2>
+    <p></p>
+    <div class="ui primary button">Add Friend</div>
+    <div class="ui right floated button">View <i class="right chevron icon"></i></div>
+  </div>
+</div>
+<div class="item">
+  <div class="image">
+    <img suiVisibility [defaultSrc]="'https://semantic-ui.com/images/wireframe/square-image.png'"
+         [transition]="'vertical flip'" [duration]="1000"
+         [imageSrc]="'https://semantic-ui.com/images/avatar/large/steve.jpg'">
+  </div>
+  <div class="content">
+    <h2 class="ui header">Steve Jobes</h2>
+    <p></p>
+    <div class="ui primary button">Add Friend</div>
+    <div class="ui right floated button">View <i class="right chevron icon"></i></div>
+  </div>
+</div>
+<div class="item">
+  <div class="image">
+    <img suiVisibility [defaultSrc]="'https://semantic-ui.com/images/wireframe/square-image.png'"
+         [transition]="'vertical flip'" [duration]="1000"
+         [imageSrc]="'https://semantic-ui.com/images/avatar/large/ade.jpg'">
+  </div>
+  <div class="content">
+    <h2 class="ui header">Ade</h2>
+    <p></p>
+    <div class="ui primary button">Add Friend</div>
+    <div class="ui right floated button">View <i class="right chevron icon"></i></div>
+  </div>
+</div>
+<div class="item">
+  <div class="image">
+    <img suiVisibility [defaultSrc]="'https://semantic-ui.com/images/wireframe/square-image.png'" 
+         [transition]="'vertical flip'" [duration]="1000"
+         [imageSrc]="'https://semantic-ui.com/images/avatar/large/chris.jpg'">
+  </div>
+  <div class="content">
+    <h2 class="ui header">Chris</h2>
+    <p></p>
+    <div class="ui primary button">Add Friend</div>
+    <div class="ui right floated button">View <i class="right chevron icon"></i></div>
+  </div>
+</div>
+<div class="item">
+  <div class="image">
+    <img suiVisibility [defaultSrc]="'https://semantic-ui.com/images/wireframe/square-image.png'"
+         [transition]="'vertical flip'" [duration]="1000"
+         [imageSrc]="'https://semantic-ui.com/images/avatar/large/joe.jpg'">
+  </div>
+  <div class="content">
+    <h2 class="ui header">Joe Henderson</h2>
+    <p></p>
+    <div class="ui primary button">Add Friend</div>
+    <div class="ui right floated button">View <i class="right chevron icon"></i></div>
+  </div>
+</div>
+<div class="item">
+  <div class="image">
+    <img suiVisibility [defaultSrc]="'https://semantic-ui.com/images/wireframe/square-image.png'"
+         [transition]="'vertical flip'" [duration]="1000"
+         [imageSrc]="'https://semantic-ui.com/images/avatar/large/laura.jpg'">
+  </div>
+  <div class="content">
+    <h2 class="ui header">Laura</h2>
+    <p></p>
+    <div class="ui primary button">Add Friend</div>
+    <div class="ui right floated button">View <i class="right chevron icon"></i></div>
+  </div>
+</div>
+</div>
+`;
 
 const exampleInfiniteScrollTemplate = `
 <div class="ui segment" suiVisibility
@@ -208,9 +383,15 @@ export class VisibilityExampleInfiniteScroll {
             setTimeout(() => {
                 this.contents.push("new item");
                 this.loading = false;
-            }, 3000);
+            }, 1000);
         }
     }
 }
 
-export const VisibilityPageComponents = [VisibilityPage, VisibilityExampleInfiniteScroll];
+@Component({
+    selector: "example-visibility-lazy-loading-images",
+    template: exampleLazyLoadingImagesTemplate
+})
+export class VisibilityExampleLazyLoadingImages { }
+
+export const VisibilityPageComponents = [VisibilityPage, VisibilityExampleInfiniteScroll, VisibilityExampleLazyLoadingImages];

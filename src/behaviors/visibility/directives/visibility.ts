@@ -1,6 +1,8 @@
 import { Directive,
          Renderer2,
+         ChangeDetectorRef,
          ElementRef,
+         OnInit,
          OnDestroy,
          AfterViewInit,
          EventEmitter,
@@ -17,11 +19,29 @@ import { PassingAmount } from "../classes/passing-amount";
 import { Subject } from "rxjs/Subject";
 import { Subscription } from "rxjs/Subscription";
 import "rxjs/add/operator/distinctUntilChanged";
+import { TransitionController, Transition, TransitionDirection, SuiTransition } from "../../../modules/transition/index";
+
+type ElementType = "image"|"other";
 
 @Directive({
     selector: "[suiVisibility]"
 })
-export class SuiVisibility implements OnDestroy, AfterViewInit {
+export class SuiVisibility extends SuiTransition implements OnInit, OnDestroy, AfterViewInit {
+
+    @Input()
+    public imageSrc:string;
+
+    @Input()
+    public defaultSrc:string;
+
+    @Input()
+    public transition:string;
+
+    @Input()
+    public duration:number = 1000;
+
+    @Output()
+    public onLoad:EventEmitter<any> = new EventEmitter<any>();
 
     @Input()
     public observeChanges:boolean = true;
@@ -118,8 +138,20 @@ export class SuiVisibility implements OnDestroy, AfterViewInit {
     private _resizeListener:() => void;
     private _scrollListener:() => void;
     private _scrollingContext:Element|Window;
+    private _elementType:ElementType;
+    private _transitionController:TransitionController;
 
-    constructor(private _renderer:Renderer2, private _element:ElementRef, @Inject(DOCUMENT) private _document:Document) { }
+    constructor(renderer:Renderer2,
+                element:ElementRef,
+                changeDetector:ChangeDetectorRef,
+                @Inject(DOCUMENT) private _document:Document) {
+        super(renderer, element, changeDetector);
+    }
+
+    public ngOnInit():void {
+        this.determineType();
+        this.setupImage();
+    }
 
     public ngAfterViewInit():void {
         this.initialize();
@@ -127,6 +159,39 @@ export class SuiVisibility implements OnDestroy, AfterViewInit {
 
     public ngOnDestroy():void {
         this.unbindEvents();
+    }
+
+    private determineType():void {
+        if (this._element.nativeElement.tagName === "IMG") {
+            this._elementType = "image";
+        } else {
+            this._elementType = "other";
+        }
+    }
+
+    private setupImage():void {
+        if (this._elementType === "image") {
+            this.once = true;
+            if (this.defaultSrc) {
+                this._element.nativeElement.src = this.defaultSrc;
+            }
+            this._transitionController = new TransitionController(true);
+            this.setTransitionController(this._transitionController);
+        }
+    }
+
+    private lazyLoadImage():void {
+        if (this._elementType === "image") {
+            const element = this._renderer.createElement("img");
+            element.src = this.imageSrc;
+            element.onload = () => {
+                this._renderer.setProperty(this._element.nativeElement, "src", this.imageSrc);
+                if (this.transition) {
+                    this._transitionController.animate(new Transition(this.transition, this.duration, TransitionDirection.In));
+                }
+                this.onLoad.emit(this._element.nativeElement);
+            };
+        }
     }
 
     private initialize():void {
@@ -597,6 +662,7 @@ export class SuiVisibility implements OnDestroy, AfterViewInit {
             this._onOnScreenSubscription = this._onOnScreen.distinctUntilChanged()
             .subscribe(isOnScreen => {
                 if (isOnScreen) {
+                    this.lazyLoadImage();
                     this.onOnScreen.emit();
                 }
             });
@@ -677,6 +743,7 @@ export class SuiVisibility implements OnDestroy, AfterViewInit {
             this._onOnScreenSubscription = this._onOnScreen
             .subscribe(isOnScreen => {
                 if (isOnScreen) {
+                    this.lazyLoadImage();
                     this.onOnScreen.emit();
                 }
             });
