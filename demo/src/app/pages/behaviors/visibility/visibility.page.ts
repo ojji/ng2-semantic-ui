@@ -537,7 +537,7 @@ export class VisibilityExampleInfiniteScroll {
             setTimeout(() => {
                 this.contents.push("new item");
                 this.loading = false;
-            }, 1000);
+            },         1000);
         }
     }
 }
