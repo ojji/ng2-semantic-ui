@@ -98,7 +98,7 @@ export class VisibilityPage {
                     type: "number",
                     description: `If the directive host is an <code>img</code> element, this property sets a duration 
                     for the transition animation.`,
-                    defaultValue: "1000",
+                    defaultValue: "500",
                     required: false
                 }
             ],

@@ -38,7 +38,7 @@ export class SuiVisibility extends SuiTransition implements OnInit, OnDestroy, A
     public transition:string;
 
     @Input()
-    public duration:number = 1000;
+    public duration:number = 500;
 
     @Output()
     public onLoad:EventEmitter<any> = new EventEmitter<any>();
