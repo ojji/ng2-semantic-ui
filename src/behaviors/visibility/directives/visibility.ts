@@ -8,6 +8,7 @@ import { Directive,
          EventEmitter,
          Output,
          Input,
+         HostBinding,
          Inject } from "@angular/core";
 import { IPassingStep } from "../interfaces/passing-step";
 import { DOCUMENT } from "@angular/platform-browser";
@@ -27,6 +28,15 @@ type ElementType = "image"|"other";
     selector: "[suiVisibility]"
 })
 export class SuiVisibility extends SuiTransition implements OnInit, OnDestroy, AfterViewInit {
+
+    @Input()
+    public fixed:boolean;
+
+    @HostBinding("class.fixed")
+    public isFixedClassOn:boolean = false;
+
+    @Input()
+    public offset:number = 0;
 
     @Input()
     public imageSrc:string;
@@ -140,6 +150,9 @@ export class SuiVisibility extends SuiTransition implements OnInit, OnDestroy, A
     private _scrollingContext:Element|Window;
     private _elementType:ElementType;
     private _transitionController:TransitionController;
+    private _placeholder:HTMLElement;
+    private _fixedOnTopPassedSubscription:Subscription;
+    private _fixedOnTopNotPassedSubscription:Subscription;
 
     constructor(renderer:Renderer2,
                 element:ElementRef,
@@ -150,6 +163,7 @@ export class SuiVisibility extends SuiTransition implements OnInit, OnDestroy, A
 
     public ngOnInit():void {
         this.determineType();
+        this.setupFixed();
         this.setupImage();
     }
 
@@ -159,6 +173,77 @@ export class SuiVisibility extends SuiTransition implements OnInit, OnDestroy, A
 
     public ngOnDestroy():void {
         this.unbindEvents();
+        this.unbindFixedEvents();
+    }
+
+    private createPlaceholder(element:ElementRef):void {
+        this._placeholder = this._renderer.createElement("div");
+        this.cloneClasses(element.nativeElement, this._placeholder);
+        this.clonePosition(element.nativeElement, this._placeholder);
+        this._renderer.insertBefore(element.nativeElement.parentNode, this._placeholder, element.nativeElement);
+    }
+
+    private cloneClasses(element:Element, placeholder:HTMLElement):void {
+        const classes = element.className.split(" ")
+                        .filter(c => c !== "fixed" && c !== "transition")
+                        .forEach(c => this._renderer.addClass(placeholder, c));
+    }
+
+    private clonePosition(element:Element, placeholder:HTMLElement):void {
+        this._renderer.setStyle(placeholder, "width", this.getCss(element, "width"));
+        this._renderer.setStyle(placeholder, "height", this.getCss(element, "height"));
+        this._renderer.setStyle(placeholder, "top", this.getCss(element, "top"));
+        this._renderer.setStyle(placeholder, "right", this.getCss(element, "right"));
+        this._renderer.setStyle(placeholder, "bottom", this.getCss(element, "bottom"));
+        this._renderer.setStyle(placeholder, "left", this.getCss(element, "left"));
+        this._renderer.setStyle(placeholder, "position", this.getCss(element, "position"));
+        this._renderer.setStyle(placeholder, "z-index", this.getCss(element, "z-index"));
+        this._renderer.setStyle(placeholder, "display", "none");
+    }
+
+    private getCss(element:any, property:string):any {
+        let result:any = "";
+        if (typeof window.getComputedStyle !== "undefined") {
+            result = window.getComputedStyle(element, "").getPropertyValue(property);
+        } else if (typeof element.currentStyle !== "undefined") {
+            result = element.currentStyle[property];
+        }
+        return result;
+    }
+
+    private setupFixed():void {
+        if (this.fixed) {
+            this.createPlaceholder(this._element);
+            this.bindFixedEvents();
+        }
+    }
+
+    private bindFixedEvents():void {
+        this._fixedOnTopPassedSubscription = this.onTopPassed.subscribe(() => {
+            this.isFixedClassOn = true;
+            this.showPlaceholder();
+        });
+        this._fixedOnTopNotPassedSubscription = this.onTopNotPassed.subscribe(() => {
+            this.isFixedClassOn = false;
+            this.hidePlaceholder();
+        });
+    }
+
+    private showPlaceholder():void {
+        this._renderer.setStyle(this._placeholder, "display", "block");
+    }
+
+    private hidePlaceholder():void {
+        this._renderer.setStyle(this._placeholder, "display", "none");
+    }
+
+    private unbindFixedEvents():void {
+        if (this._fixedOnTopPassedSubscription) {
+            this._fixedOnTopPassedSubscription.unsubscribe();
+        }
+        if (this._fixedOnTopNotPassedSubscription) {
+            this._fixedOnTopNotPassedSubscription.unsubscribe();
+        }
     }
 
     private determineType():void {
@@ -212,8 +297,8 @@ export class SuiVisibility extends SuiTransition implements OnInit, OnDestroy, A
         this._cache.screen.height = window.innerHeight;
     }
 
-    private getOffset():any {
-        const rect:ClientRect = this._element.nativeElement.getBoundingClientRect();
+    private getOffset(element:HTMLElement):any {
+        const rect:ClientRect = element.getBoundingClientRect();
         if (this._scrollingContext instanceof Window) {
             return {
                 top: rect.top + this._scrollingContext.pageYOffset,
@@ -227,13 +312,13 @@ export class SuiVisibility extends SuiTransition implements OnInit, OnDestroy, A
         }
     }
 
-    private getHeight():number {
-        const rect:ClientRect = this._element.nativeElement.getBoundingClientRect();
+    private getHeight(element:HTMLElement):number {
+        const rect:ClientRect = element.getBoundingClientRect();
         return rect.height;
     }
 
-    private getWidth():number {
-        const rect:ClientRect = this._element.nativeElement.getBoundingClientRect();
+    private getWidth(element:HTMLElement):number {
+        const rect:ClientRect = element.getBoundingClientRect();
         return rect.width;
     }
 
@@ -245,12 +330,16 @@ export class SuiVisibility extends SuiTransition implements OnInit, OnDestroy, A
     }
 
     private saveElementPosition():void {
+        // the element position is calculated
+        // if the element is in a fixed state, we should use the position of the placeholder,
+        // since that is the one in the original position
+        const anchorElement = (this.fixed && this.isFixedClassOn) ? this._placeholder : this._element.nativeElement;
         const element:any = {};
         const screen:IScreen = this._cache.screen;
-        element.height = this.getHeight();
-        element.width  = this.getWidth();
+        element.height = this.getHeight(anchorElement);
+        element.width  = this.getWidth(anchorElement);
         element.fits   = (element.height < screen.height);
-        element.offset = this.getOffset();
+        element.offset = this.getOffset(anchorElement);
 
         this._cache.element = element;
     }
@@ -269,9 +358,9 @@ export class SuiVisibility extends SuiTransition implements OnInit, OnDestroy, A
 
     private getScrollPositionFromContext():IScrollPosition {
         if (this._scrollingContext instanceof Window) {
-            return { x: this._scrollingContext.pageXOffset, y: this._scrollingContext.pageYOffset };
+            return { x: this._scrollingContext.pageXOffset, y: this._scrollingContext.pageYOffset + this.offset };
         } else {
-            return { x: this._scrollingContext.scrollLeft, y: this._scrollingContext.scrollTop };
+            return { x: this._scrollingContext.scrollLeft, y: this._scrollingContext.scrollTop + this.offset };
         }
     }
 

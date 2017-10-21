@@ -7,6 +7,8 @@ import { ApiDefinition } from "../../../components/api/api.component";
 export class VisibilityPage {
     public exampleInfiniteScrollTemplate:string = exampleInfiniteScrollTemplate;
     public exampleLazyLoadingImagesTemplate:string = exampleLazyLoadingImagesTemplate;
+    public exampleFixingContentToViewportTemplate:string = exampleFixingContentToViewportTemplate;
+    public exampleFixingContentToViewportStylesheet:string = exampleFixingContentToViewportStylesheet;
     public api:ApiDefinition = [
         {
             selector: "[suiVisibility]",
@@ -99,6 +101,24 @@ export class VisibilityPage {
                     description: `If the directive host is an <code>img</code> element, this property sets a duration 
                     for the transition animation.`,
                     defaultValue: "500",
+                    required: false
+                },
+                {
+                    name: "offset",
+                    type: "number",
+                    description: `Sets how the top scroll position should be adjusted in pixels. 
+                    Useful when there is a fixed content on the page, eg. the element starts passing under a fixed menu.`,
+                    defaultValue: "0",
+                    required: false
+                },
+                {
+                    name: "fixed",
+                    type: "boolean",
+                    description: `Enables the element fixing funtionality. When the directive host is passed on the top, 
+                    the directive adds the <code>fixed</code> class to the host element so you can style the element to a new position,
+                    and at the same time puts a placeholder element in the original position thus the original page layout will 
+                    not be broken.`,
+                    defaultValue: "false",
                     required: false
                 }
             ],
@@ -366,6 +386,140 @@ const exampleInfiniteScrollTemplate = `
 </div>
 `;
 
+const exampleFixingContentToViewportTemplate = `
+<div class="ui borderless main menu" suiVisibility [fixed]="true">
+    <div class="ui text container">
+        <div class="header item">
+            <img class="logo" src="https://semantic-ui.com/images/logo.png">
+            Project Name
+        </div>
+        <div class="item">Blog</div>
+        <div class="item">Articles</div>
+        <div class="ui right floated dropdown item" suiDropdown>
+            Dropdown <i class="dropdown icon"></i>
+            <div class="menu" suiDropdownMenu>
+                <div class="item">Link Item</div>
+                <div class="item">Link Item</div>
+                <div class="divider"></div>
+                <div class="header">Header Item</div>
+                <div class="item" suiDropdown>
+                    <i class="dropdown icon"></i>
+                    Sub Menu
+                    <div class="menu" suiDropdownMenu>
+                        <div class="item">Link Item</div>
+                        <div class="item">Link Item</div>
+                    </div>
+                </div>
+                <div class="item">Link Item</div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="ui text container">
+    <p>
+        Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae,
+        ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat 
+        eleifend leo. Quisque sit amet est et sapien ullamcorper pharetra. Vestibulum erat wisi, condimentum sed, commodo vitae, ornare sit 
+        amet, wisi. Aenean fermentum, elit eget tincidunt condimentum, eros ipsum rutrum orci, sagittis tempus lacus enim ac dui. Donec non 
+        enim in turpis pulvinar facilisis. Ut felis. Praesent dapibus, neque id cursus faucibus, tortor neque egestas augue, eu vulputate 
+        magna eros eu erat. Aliquam erat volutpat. Nam dui mi, tincidunt quis, accumsan porttitor, facilisis luctus, metus.
+    </p>
+    <p>
+        Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae,
+        ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat 
+        eleifend leo. Quisque sit amet est et sapien ullamcorper pharetra. Vestibulum erat wisi, condimentum sed, commodo vitae, ornare sit 
+        amet, wisi. Aenean fermentum, elit eget tincidunt condimentum, eros ipsum rutrum orci, sagittis tempus lacus enim ac dui. Donec non 
+        enim in turpis pulvinar facilisis. Ut felis. Praesent dapibus, neque id cursus faucibus, tortor neque egestas augue, eu vulputate 
+        magna eros eu erat. Aliquam erat volutpat. Nam dui mi, tincidunt quis, accumsan porttitor, facilisis luctus, metus.
+    </p>
+    <p>
+        Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae,
+        ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat 
+        eleifend leo. Quisque sit amet est et sapien ullamcorper pharetra. Vestibulum erat wisi, condimentum sed, commodo vitae, ornare sit 
+        amet, wisi. Aenean fermentum, elit eget tincidunt condimentum, eros ipsum rutrum orci, sagittis tempus lacus enim ac dui. Donec non 
+        enim in turpis pulvinar facilisis. Ut felis. Praesent dapibus, neque id cursus faucibus, tortor neque egestas augue, eu vulputate 
+        magna eros eu erat. Aliquam erat volutpat. Nam dui mi, tincidunt quis, accumsan porttitor, facilisis luctus, metus.
+    </p>
+    <div class="overlay" suiVisibility [fixed]="true" [offset]="66">
+        <div class="ui labeled icon vertical menu">
+            <a class="item"><i class="twitter icon"></i> Tweet</a>
+            <a class="item"><i class="facebook icon"></i> Share</a>
+            <a class="item"><i class="mail icon"></i> E-mail</a>
+        </div>
+    </div>
+    <p>
+        Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae,
+        ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat 
+        eleifend leo. Quisque sit amet est et sapien ullamcorper pharetra. Vestibulum erat wisi, condimentum sed, commodo vitae, ornare sit 
+        amet, wisi. Aenean fermentum, elit eget tincidunt condimentum, eros ipsum rutrum orci, sagittis tempus lacus enim ac dui. Donec non 
+        enim in turpis pulvinar facilisis. Ut felis. Praesent dapibus, neque id cursus faucibus, tortor neque egestas augue, eu vulputate 
+        magna eros eu erat. Aliquam erat volutpat. Nam dui mi, tincidunt quis, accumsan porttitor, facilisis luctus, metus.
+    </p>
+    <p>
+        Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae,
+        ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat 
+        eleifend leo. Quisque sit amet est et sapien ullamcorper pharetra. Vestibulum erat wisi, condimentum sed, commodo vitae, ornare sit 
+        amet, wisi. Aenean fermentum, elit eget tincidunt condimentum, eros ipsum rutrum orci, sagittis tempus lacus enim ac dui. Donec non 
+        enim in turpis pulvinar facilisis. Ut felis. Praesent dapibus, neque id cursus faucibus, tortor neque egestas augue, eu vulputate 
+        magna eros eu erat. Aliquam erat volutpat. Nam dui mi, tincidunt quis, accumsan porttitor, facilisis luctus, metus.
+    </p>
+    <p>
+        Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae,
+        ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat 
+        eleifend leo. Quisque sit amet est et sapien ullamcorper pharetra. Vestibulum erat wisi, condimentum sed, commodo vitae, ornare sit 
+        amet, wisi. Aenean fermentum, elit eget tincidunt condimentum, eros ipsum rutrum orci, sagittis tempus lacus enim ac dui. Donec non 
+        enim in turpis pulvinar facilisis. Ut felis. Praesent dapibus, neque id cursus faucibus, tortor neque egestas augue, eu vulputate 
+        magna eros eu erat. Aliquam erat volutpat. Nam dui mi, tincidunt quis, accumsan porttitor, facilisis luctus, metus.
+    </p>
+</div>
+`;
+
+const exampleFixingContentToViewportStylesheet = `
+.main.container {
+    margin-top: 2em;
+}
+
+.main.menu {
+    margin-top: 4em;
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
+    transition: box-shadow 0.5s ease, padding 0.5s ease;
+}
+.main.menu .item img.logo {
+    margin-right: 1.5em;
+}
+
+.main.menu.fixed {
+    margin: 0;
+    background-color: #FFFFFF;
+    border: 1px solid #DDD;
+    box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.2);
+}
+
+.overlay {
+    float: left;
+    margin: 0em 3em 1em 0em;    
+}
+
+.overlay.fixed {
+    position: fixed;
+    top: 90px;
+    left: auto;
+    z-index: 10;
+}
+
+.overlay .menu {
+    position: relative;
+    left: 0;
+    transition: left 0.5s ease;
+}
+
+.overlay.fixed .menu {
+    left: 730px;
+}
+`;
+
 @Component({
     selector: "example-visibility-infinite-scroll",
     template: exampleInfiniteScrollTemplate
@@ -394,4 +548,16 @@ export class VisibilityExampleInfiniteScroll {
 })
 export class VisibilityExampleLazyLoadingImages { }
 
-export const VisibilityPageComponents = [VisibilityPage, VisibilityExampleInfiniteScroll, VisibilityExampleLazyLoadingImages];
+@Component({
+    selector: "example-fixing-content-to-viewport",
+    template: exampleFixingContentToViewportTemplate,
+    styles: [exampleFixingContentToViewportStylesheet]
+})
+export class VisibilityFixingContentToViewport { }
+
+export const VisibilityPageComponents = [
+    VisibilityPage,
+    VisibilityExampleInfiniteScroll,
+    VisibilityExampleLazyLoadingImages,
+    VisibilityFixingContentToViewport
+];

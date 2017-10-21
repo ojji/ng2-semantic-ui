@@ -27,6 +27,21 @@
         </div>
         <example-visibility-lazy-loading-images result></example-visibility-lazy-loading-images>
     </demo-example>
+    <demo-example [code]="exampleFixingContentToViewportTemplate">
+        <div info>
+            <h4 class="ui header">Fixing Content To Viewport</h4>
+            <p>Visibility provides a lightweight method for sticking content to a page's viewport. Using <code>[fixed]="true"</code> will add the class <code>fixed</code> after an element is passed in the viewport. Using this class name you can assign special layout conditions to an item once it is passed.</p>
+            <p>Using the special visibility type fixed will automatically create a placeholder element, which will be shown or hidden after an element is passed, to ensure that the page's position does not change when the element is "fixed" and removed from normal layout flow.</p>
+            <p>In this example, when an element is passed we fix it to the viewport, add a box shadow and set the z-index value so that it can float above other content. We also show an adjacent placeholder element which makes sure that content stays offset the same as if the menu was still in content flow.</p>
+        </div>
+        <example-fixing-content-to-viewport result></example-fixing-content-to-viewport>
+    </demo-example>
+    <sui-message class="attached warning" [isDismissable]="false">
+        <p>Content fixing example stlyesheet</p>
+    </sui-message>
+    <div class="ui bottom attached segment">
+        <demo-codeblock language="css" [src]="exampleFixingContentToViewportStylesheet"></demo-codeblock>
+    </div>
     <h2 id="api" class="ui dividing header">API</h2>
     <demo-api [api]="api"></demo-api>
 </demo-page-content>
