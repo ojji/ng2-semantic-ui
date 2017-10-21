@@ -296,7 +296,7 @@ export class SuiVisibility extends SuiTransition implements OnInit, OnDestroy, A
         this._onOnScreen.next(false);
         this._onOffScreen.next(false);
         this._onTopPassed.next(false);
-        this._onTopPassed.next(false);
+        this._onTopNotPassed.next(false);
         this._onTopVisible.next(false);
         this._onTopNotVisible.next(false);
         this._onBottomPassed.next(false);
