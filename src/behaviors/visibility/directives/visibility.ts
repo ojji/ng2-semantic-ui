@@ -154,10 +154,11 @@ export class SuiVisibility extends SuiTransition implements OnInit, OnDestroy, A
     private _fixedOnTopPassedSubscription:Subscription;
     private _fixedOnTopNotPassedSubscription:Subscription;
 
+    // TODO: Change the any type to Document when https://github.com/angular/angular/issues/15640 is fixed.
     constructor(renderer:Renderer2,
                 element:ElementRef,
                 changeDetector:ChangeDetectorRef,
-                @Inject(DOCUMENT) private _document:Document) {
+                @Inject(DOCUMENT) private _document:any) {
         super(renderer, element, changeDetector);
     }
 
