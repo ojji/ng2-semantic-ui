@@ -51,7 +51,8 @@ function configure(plugins = []) {
             "@angular/common",
             "@angular/core",
             "@angular/forms",
-            "rxjs/Subscription"
+            "rxjs/Subscription",
+            "rxjs/Subject"
         ]
     }
 }
